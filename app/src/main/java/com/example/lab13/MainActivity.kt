@@ -5,6 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -32,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,7 +49,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             Lab13Theme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AnimatedVisibilityExercise(
+                    AnimateColorExercise(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -54,6 +58,59 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// Ejercicio 2: animateColorAsState
+@Composable
+fun AnimateColorExercise(modifier: Modifier = Modifier) {
+    var isBlue by remember { mutableStateOf(true) }
+
+    val animatedColor by animateColorAsState(
+        targetValue = if (isBlue) Color(0xFF2196F3) else Color(0xFF4CAF50),
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "ColorAnimation"
+    )
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Ejercicio 2: animateColorAsState",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(onClick = { isBlue = !isBlue }) {
+            Text(text = if (isBlue) "Cambiar a Verde" else "Cambiar a Azul")
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Box(
+            modifier = Modifier
+                .size(160.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(animatedColor),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (isBlue) "Azul" else "Verde",
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+// Ejercicio 1: AnimatedVisibility (disponible para fácil referencia)
 @Composable
 fun AnimatedVisibilityExercise(modifier: Modifier = Modifier) {
     var isVisible by remember { mutableStateOf(true) }
@@ -101,6 +158,14 @@ fun AnimatedVisibilityExercise(modifier: Modifier = Modifier) {
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AnimateColorExercisePreview() {
+    Lab13Theme {
+        AnimateColorExercise()
     }
 }
 
