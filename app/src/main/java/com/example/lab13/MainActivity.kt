@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
@@ -14,10 +15,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -26,6 +29,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -51,7 +55,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             Lab13Theme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AnimateSizeAndPositionExercise(
+                    AnimatedContentExercise(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -60,12 +64,126 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// Ejercicio 3: Animación de Tamaño y Posición (animateDpAsState y Modifier.offset)
+// 1. Definición de los tres estados UI
+enum class ScreenState {
+    Loading, Content, Error
+}
+
+// Ejercicio 4: Cambio de Contenido con AnimatedContent
+@Composable
+fun AnimatedContentExercise(modifier: Modifier = Modifier) {
+    var currentState by remember { mutableStateOf(ScreenState.Loading) }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Ejercicio 4: AnimatedContent",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Botones para alternar entre los tres estados
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(onClick = { currentState = ScreenState.Loading }) {
+                Text("Cargando", fontSize = 12.sp)
+            }
+            Button(onClick = { currentState = ScreenState.Content }) {
+                Text("Contenido", fontSize = 12.sp)
+            }
+            Button(onClick = { currentState = ScreenState.Error }) {
+                Text("Error", fontSize = 12.sp)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // 2 y 3. AnimatedContent con transición personalizada (fadeIn/fadeOut con tiempos)
+        AnimatedContent(
+            targetState = currentState,
+            transitionSpec = {
+                fadeIn(animationSpec = tween(durationMillis = 700)) togetherWith
+                        fadeOut(animationSpec = tween(durationMillis = 700))
+            },
+            label = "StateTransition"
+        ) { targetState ->
+            Box(
+                modifier = Modifier
+                    .size(240.dp, 160.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        when (targetState) {
+                            ScreenState.Loading -> Color(0xFFFFF3E0)
+                            ScreenState.Content -> Color(0xFFE8F5E9)
+                            ScreenState.Error -> Color(0xFFFFEBEE)
+                        }
+                    )
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                when (targetState) {
+                    ScreenState.Loading -> {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            CircularProgressIndicator(color = Color(0xFFFB8C00))
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = "Cargando datos...",
+                                color = Color(0xFFE65100),
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                    ScreenState.Content -> {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "¡Carga Exitosa!",
+                                fontSize = 18.sp,
+                                color = Color(0xFF2E7D32),
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Se mostró el contenido correctamente.",
+                                color = Color(0xFF1B5E20),
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
+                    ScreenState.Error -> {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "Error de Conexión",
+                                fontSize = 18.sp,
+                                color = Color(0xFFC62828),
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "No se pudo cargar la información.",
+                                color = Color(0xFFB71C1C),
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Ejercicio 3: Animación de Tamaño y Posición
 @Composable
 fun AnimateSizeAndPositionExercise(modifier: Modifier = Modifier) {
     var isMovedAndExpanded by remember { mutableStateOf(false) }
 
-    // 2. animateDpAsState para cambiar tamaño y posición
     val boxSize by animateDpAsState(
         targetValue = if (isMovedAndExpanded) 200.dp else 100.dp,
         animationSpec = spring(
@@ -102,7 +220,6 @@ fun AnimateSizeAndPositionExercise(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 1. Botón para mover y cambiar tamaño
         Button(onClick = { isMovedAndExpanded = !isMovedAndExpanded }) {
             Text(text = if (isMovedAndExpanded) "Restablecer" else "Mover y Agrandar")
         }
@@ -113,7 +230,6 @@ fun AnimateSizeAndPositionExercise(modifier: Modifier = Modifier) {
             modifier = Modifier.size(280.dp),
             contentAlignment = Alignment.TopCenter
         ) {
-            // 3. Modificadores: offset se aplica para trasladar la caja y size para cambiar sus dimensiones
             Box(
                 modifier = Modifier
                     .offset(x = offsetX, y = offsetY)
@@ -233,6 +349,14 @@ fun AnimatedVisibilityExercise(modifier: Modifier = Modifier) {
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AnimatedContentExercisePreview() {
+    Lab13Theme {
+        AnimatedContentExercise()
     }
 }
 
