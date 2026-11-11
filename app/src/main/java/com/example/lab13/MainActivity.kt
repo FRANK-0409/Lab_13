@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -49,10 +51,83 @@ class MainActivity : ComponentActivity() {
         setContent {
             Lab13Theme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AnimateColorExercise(
+                    AnimateSizeAndPositionExercise(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
+            }
+        }
+    }
+}
+
+// Ejercicio 3: Animación de Tamaño y Posición (animateDpAsState y Modifier.offset)
+@Composable
+fun AnimateSizeAndPositionExercise(modifier: Modifier = Modifier) {
+    var isMovedAndExpanded by remember { mutableStateOf(false) }
+
+    // 2. animateDpAsState para cambiar tamaño y posición
+    val boxSize by animateDpAsState(
+        targetValue = if (isMovedAndExpanded) 200.dp else 100.dp,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "boxSize"
+    )
+
+    val offsetX by animateDpAsState(
+        targetValue = if (isMovedAndExpanded) 60.dp else 0.dp,
+        animationSpec = tween(durationMillis = 600),
+        label = "offsetX"
+    )
+
+    val offsetY by animateDpAsState(
+        targetValue = if (isMovedAndExpanded) 40.dp else 0.dp,
+        animationSpec = tween(durationMillis = 600),
+        label = "offsetY"
+    )
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Ejercicio 3: Tamaño y Posición",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // 1. Botón para mover y cambiar tamaño
+        Button(onClick = { isMovedAndExpanded = !isMovedAndExpanded }) {
+            Text(text = if (isMovedAndExpanded) "Restablecer" else "Mover y Agrandar")
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Box(
+            modifier = Modifier.size(280.dp),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            // 3. Modificadores: offset se aplica para trasladar la caja y size para cambiar sus dimensiones
+            Box(
+                modifier = Modifier
+                    .offset(x = offsetX, y = offsetY)
+                    .size(boxSize)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.secondary),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = if (isMovedAndExpanded) "Grande" else "Pequeño",
+                    color = MaterialTheme.colorScheme.onSecondary,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
@@ -110,7 +185,7 @@ fun AnimateColorExercise(modifier: Modifier = Modifier) {
     }
 }
 
-// Ejercicio 1: AnimatedVisibility (disponible para fácil referencia)
+// Ejercicio 1: AnimatedVisibility
 @Composable
 fun AnimatedVisibilityExercise(modifier: Modifier = Modifier) {
     var isVisible by remember { mutableStateOf(true) }
@@ -158,6 +233,14 @@ fun AnimatedVisibilityExercise(modifier: Modifier = Modifier) {
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AnimateSizeAndPositionExercisePreview() {
+    Lab13Theme {
+        AnimateSizeAndPositionExercise()
     }
 }
 
